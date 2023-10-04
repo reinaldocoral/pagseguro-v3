@@ -1,0 +1,17 @@
+{
+    "name": "reinaldocoral/pagseguro-v3",
+    "type": "library",
+    "require": {
+        "php": ">=7.4",
+        "guzzlehttp/guzzle": "^6.3.1|^7.0.1"
+    },
+    "authors": [
+        {
+            "name": "Reinaldo Coral",
+            "email": "morfeu.rio@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"ReinaldoCoral\\Pagseguro\\": "src/"}
+    }
+}
