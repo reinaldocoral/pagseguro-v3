@@ -105,7 +105,7 @@ class PagamentoSearch
         $busca = new HttpResponse($response);
 
         if( $busca->successful() ){
-            return $this->fillOrder( $busca->json() );
+            return $this->fillOrder( $busca->json()['orders'][0] ?? null );
         }
         
         return null;
