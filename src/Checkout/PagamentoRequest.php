@@ -31,6 +31,6 @@ class PagamentoRequest
             'body'    => json_encode($this->payload),
         ]);
 
-        return $response;
+        return new PagamentoResponse($response);
     }
 }

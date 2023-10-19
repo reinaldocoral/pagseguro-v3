@@ -14,7 +14,7 @@ class Configure
         
     }
 
-    public function setAccountCredentials( $email, $token )
+    public function setAccountCredentials( $email, string $token )
     {
         $this->email = $email;
         $this->token = $token;
