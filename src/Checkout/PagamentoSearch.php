@@ -140,6 +140,10 @@ class PagamentoSearch
             $order->addItems( $item );
         }
 
+        foreach ($data['charges'] ?? [] as $charge) {
+            $order->setCharges( $charge );
+        }
+
         $order->setOrderStatus( $data['charges'][0]['status'] ?? null );
         return $order;
     }

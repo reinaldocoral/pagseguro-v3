@@ -58,6 +58,10 @@ class Notification
                 $transaction->addItems( $item );
             }
 
+            foreach ($data['charges'] ?? [] as $charge) {
+                $transaction->setCharges( $charge );
+            }
+
             $transaction->setOrderStatus( $data['charges'][0]['status'] ?? null );
             return $transaction;
         }
