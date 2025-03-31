@@ -29,7 +29,7 @@ class Notification
 
     public function read()
     {        
-        if ( $this->hasValidNotification() ) {
+        if ( $this->hasValidNotification() ) { 
             $data = $this->data;
             $transaction = new Order();
             $transaction->setId( $data['id'] ?? null );
@@ -46,12 +46,14 @@ class Notification
             $address = new Address();
             $address->setStreet( $data['shipping']['address']['street'] ?? null);
             $address->setNumber( $data['shipping']['address']['number'] ?? null);
-            $address->setComplement( $data['shipping']['address']['complement'] ?? null);
             $address->setLocality( $data['shipping']['address']['locality'] ?? null);
             $address->setCity( $data['shipping']['address']['city'] ?? null);
             $address->setRegionCode( $data['shipping']['address']['region_code'] ?? null);
             $address->setCountry( $data['shipping']['address']['country'] ?? null);
             $address->setPostalCode( $data['shipping']['address']['postal_code'] ?? null);
+            if( $data['shipping']['address']['complement'] ?? null ){
+                $address->setComplement( $data['shipping']['address']['complement'] ?? null);
+            }
             $transaction->setShipping($address);
 
             foreach ($data['items'] ?? [] as $item) {

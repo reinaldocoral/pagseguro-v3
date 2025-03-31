@@ -19,15 +19,15 @@ class PagamentoRequest
         $this->payload = $payload;
     }
 
-    public function execute(Configure $config)
+    public function execute(Configure $config, $headers = [])
     {
         $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
         $response = $http_client->request('POST', '/checkouts', [
-            'headers' => [
+            'headers' => array_merge([
                 'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
-                'x-idempotency-key' => ''
-            ],
+                // 'x-idempotency-key' => ''
+            ], $headers),
             'body'    => json_encode($this->payload),
         ]);
 
