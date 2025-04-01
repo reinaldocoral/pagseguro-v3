@@ -11,79 +11,88 @@ use ReinaldoCoral\Pagseguro\Domains\HttpResponse;
 
 class PagamentoSearch
 {
-    private $config;
 
-    public function __construct(Configure $config)
+    private $payload;
+
+    public function __construct()
     {
-        $this->config = $config;
+        
     }
 
-    /**
-     * @param string $search_id
-     * @return Order
-     */
-    public function execute(string $search_id)
+    public function setPayload( $payload )
     {
+        $this->payload = $payload;
+    }
+
+    public function execute(Configure $config, $headers = [])
+    {
+        $search_id = $this->payload['search_id'] ?? null;
+
         if( strtoupper( substr($search_id, 0, 5) ) === 'CHEC_' ){
-            return $this->searchCheckout($search_id);
+            return $this->searchCheckout($config, $search_id, $headers);
         }
 
         if( strtoupper( substr($search_id, 0, 5) ) === 'ORDE_' ){
-            return $this->searchOrder($search_id);
+            return $this->searchOrder($config, $search_id, $headers);
         }
         
-        return $this->searchByReference($search_id);
+        return $this->searchByReference($config, $search_id, $headers);
     }
 
-    private function searchByReference(string $search_id)
+
+    private function searchByReference(Configure $config, string $search_id, $headers = [])
     {
-        $http_client = new Client(['base_uri' => $this->config->getEndpointBase()]);
-        $response = $http_client->request('GET', "/charges?reference_id=$search_id" , [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->config->getAccountToken(),
+        $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
+        $response = $http_client->request('GET', '/charges', [
+            'headers' => array_merge([
+                'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
-            ],
+            ], $headers),
+            'query'    => ['reference_id' => $search_id],
         ]);
+
         $busca = new HttpResponse($response);
 
         if( $busca->successful() ){
             if( $charge_id = $busca->object()[0]->id ?? null ){
-                return $this->searchOrderByCobranca( $charge_id );
+                return $this->searchOrderByCobranca( $config, $charge_id, $headers );
             }
         }
         
         return null;
     }
 
-    private function searchCheckout(string $search_id)
+    private function searchCheckout(Configure $config, string $search_id, $headers = [])
     {
-        $http_client = new Client(['base_uri' => $this->config->getEndpointBase()]);
-        $response = $http_client->request('GET', "/checkouts/$search_id" , [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->config->getAccountToken(),
+        $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
+        $response = $http_client->request('GET', "/checkouts/$search_id", [
+            'headers' => array_merge([
+                'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
-            ],
+            ], $headers),
         ]);
+
         $busca = new HttpResponse($response);
 
         if( $busca->successful() ){
             if( $order = $busca->object()->orders[0] ?? null ){
-                return $this->searchOrder( $order->id );
+                return $this->searchOrder( $config, $order->id, $headers );
             }
         }
         
         return null;
     }
 
-    private function searchOrder(string $search_id)
+    private function searchOrder(Configure $config, string $search_id, $headers = [])
     {
-        $http_client = new Client(['base_uri' => $this->config->getEndpointBase()]);
-        $response = $http_client->request('GET', "/orders/$search_id" , [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->config->getAccountToken(),
+        $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
+        $response = $http_client->request('GET', "/orders/$search_id", [
+            'headers' => array_merge([
+                'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
-            ],
+            ], $headers),
         ]);
+
         $busca = new HttpResponse($response);
 
         if( $busca->successful() ){
@@ -93,15 +102,17 @@ class PagamentoSearch
         return null;
     }
 
-    private function searchOrderByCobranca(string $charge_id)
+    private function searchOrderByCobranca(Configure $config, string $charge_id, $headers = [])
     {
-        $http_client = new Client(['base_uri' => $this->config->getEndpointBase()]);
-        $response = $http_client->request('GET', "/orders?charge_id=$charge_id" , [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->config->getAccountToken(),
+        $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
+        $response = $http_client->request('GET', '/orders', [
+            'headers' => array_merge([
+                'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
-            ],
+            ], $headers),
+            'query'    => ['charge_id' => $charge_id],
         ]);
+
         $busca = new HttpResponse($response);
 
         if( $busca->successful() ){

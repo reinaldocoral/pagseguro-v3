@@ -5,7 +5,6 @@ namespace ReinaldoCoral\Pagseguro;
 
 class Configure
 {
-    private $email;
     private $token;
     private $environment;
 
@@ -14,9 +13,8 @@ class Configure
         
     }
 
-    public function setAccountCredentials( $email, string $token )
+    public function setAccountCredentials( string $token )
     {
-        $this->email = $email;
         $this->token = $token;
     }
 
