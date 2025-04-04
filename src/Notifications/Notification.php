@@ -5,21 +5,33 @@ namespace ReinaldoCoral\Pagseguro\Notifications;
 use ReinaldoCoral\Pagseguro\Checkout\Objects\Address;
 use ReinaldoCoral\Pagseguro\Checkout\Objects\Customer;
 use ReinaldoCoral\Pagseguro\Checkout\Objects\Order;
+use ReinaldoCoral\Pagseguro\Configure;
 
 class Notification
 {
     private $payload;
     private $data;
+    private $config;
+    private $headers;
 
-    public function __construct()
+    public function __construct(Configure $config)
     {
         $this->payload = file_get_contents('php://input');
+        $this->headers = getallheaders();
         $this->data = json_decode($this->payload, true);
+        $this->config = $config;
     }
     
     public function hasValidNotification()
     {
-        return ( $this->data !== null );
+        return ( $this->data !== null ) && $this->hasAuthenticity();
+    }
+
+    private function hasAuthenticity()
+    {
+        $signature = hash('sha256', $this->config->getAccountToken() . '-' . $this->payload);
+        $authenticity_token = $this->headers['X-Authenticity-Token'] ?? null;
+        return $signature === $authenticity_token;
     }
 
     public function getPayload()

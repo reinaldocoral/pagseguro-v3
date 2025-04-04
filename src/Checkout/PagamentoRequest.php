@@ -2,16 +2,17 @@
 
 namespace ReinaldoCoral\Pagseguro\Checkout;
 
-use GuzzleHttp\Client;
 use ReinaldoCoral\Pagseguro\Configure;
+use ReinaldoCoral\Pagseguro\Services\LogService;
 
 class PagamentoRequest
 {
     private $payload;
+    private $http_client;
 
-    public function __construct()
+    public function __construct(LogService $logService, bool $enableLog = false)
     {
-        
+        $this->http_client = $logService->createClient($enableLog);
     }
 
     public function setPayload( $payload )
@@ -21,8 +22,8 @@ class PagamentoRequest
 
     public function execute(Configure $config, $headers = [])
     {
-        $http_client = new Client(['base_uri' => $config->getEndpointBase()]);
-        $response = $http_client->request('POST', '/checkouts', [
+        $response = $this->http_client->request('POST', '/checkouts', [
+            'base_uri' => $config->getEndpointBase(),
             'headers' => array_merge([
                 'Authorization' => 'Bearer ' . $config->getAccountToken(),
                 'Content-Type' => 'application/json',
