@@ -35,8 +35,12 @@ class PagamentoSearch
         if( strtoupper( substr($search_id, 0, 5) ) === 'ORDE_' ){
             return $this->searchOrder($config, $search_id, $headers);
         }
+
+        if( strtoupper( substr($search_id, 0, 5) ) === 'CHAR_' ){
+            return $this->searchOrderByCobranca($config, $search_id, $headers);
+        }
         
-        return $this->searchByReference($config, $search_id, $headers);
+        return $this->searchByReference($config, $search_id, $headers);     //na nova versão da api não existe mais esse recurso... deixando aqui para versão antiga
     }
 
 
@@ -153,6 +157,18 @@ class PagamentoSearch
 
         foreach ($data['charges'] ?? [] as $charge) {
             $order->setCharges( $charge );
+        }
+
+        foreach ($data['qr_codes'] ?? [] as $qr_codes) {
+            $order->setQrCodes( $qr_codes );
+        }
+
+        foreach ($data['links'] ?? [] as $links) {
+            $order->setLinks( $links );
+        }
+
+        foreach ($data['notification_urls'] ?? [] as $notification_urls) {
+            $order->setNotificationUrls( $notification_urls );
         }
 
         $order->setOrderStatus( $data['charges'][0]['status'] ?? null );

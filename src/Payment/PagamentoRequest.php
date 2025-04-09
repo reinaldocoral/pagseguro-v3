@@ -20,9 +20,10 @@ class PagamentoRequest
         $this->payload = $payload;
     }
 
-    public function execute(Configure $config, $headers = [])
+    public function execute(Configure $config, $headers = [], $order_id = null)
     {
-        $response = $this->http_client->request('POST', '/orders', [
+        $endpoint = $order_id ? "/orders/$order_id/pay": '/orders';
+        $response = $this->http_client->request('POST', $endpoint, [
             'base_uri' => $config->getEndpointBase(),
             'headers' => array_merge([
                 'Authorization' => 'Bearer ' . $config->getAccountToken(),

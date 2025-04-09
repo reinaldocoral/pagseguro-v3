@@ -184,4 +184,139 @@ class Order {
     {
         return null;
     }
+
+
+    private function isBoleto()
+    {
+        if( $charge = $this->getLastCharge() ){
+            return $charge->payment_method->type === 'BOLETO';
+        }
+        return false;
+    }
+
+    public function getLastCharge()
+    {
+        if( $charges = $this->getCharges() ?? [] ){
+            return json_decode( json_encode( $charges[ count($charges) - 1 ] ), false );
+        }
+        return null;
+    }
+
+    public function getBoletoPdfUrl()
+    {
+        if( !$this->isBoleto() ){
+            return null;
+        }
+
+        $charge = $this->getLastCharge();
+        $result = array_filter($charge->links ?? [], function($item) {
+            return $item->media === 'application/pdf';
+        });
+        
+        if (empty($result)) {
+            return null;
+        }
+
+        $firstItem = reset($result);
+        $href = $firstItem->href;
+        return $href;
+    }
+
+    public function getBoletoBarcode()
+    {
+        if( !$this->isBoleto() ){
+            // return null;
+            return (object) [
+                'barcode' => null,
+                'formatted_barcode' => null,
+            ];
+        }
+
+        $charge = $this->getLastCharge();
+        return (object) [
+            'barcode' => $charge->payment_method->boleto->barcode,
+            'formatted_barcode' => $charge->payment_method->boleto->formatted_barcode,
+        ];
+    }
+
+    public function getBoletoExpirationDate()
+    {
+        if( !$this->isBoleto() ){
+            return null;
+        }
+
+        $charge = $this->getLastCharge();
+        return $charge->payment_method->boleto->due_date;
+    }
+
+    public function getBoletoValor()
+    {
+        if( !$this->isBoleto() ){
+            return null;
+        }
+
+        $charge = $this->getLastCharge();
+        return $charge->amount->value;
+    }
+
+    private function getQrCodesObject()
+    {
+        return json_decode(json_encode($this->getQrCodes()), false);
+    }
+
+    public function getPixExpirationDate()
+    {
+        if( ! $qr_codes = $this->getQrCodesObject() ){
+            return null;
+        }
+
+        return $qr_codes[0]->expiration_date ?? null;
+    }
+
+    public function getPixCopiaCola()
+    {
+        if( ! $qr_codes = $this->getQrCodesObject() ){
+            return null;
+        }
+
+        return $qr_codes[0]->text ?? null;
+    }
+
+    public function getPixQrCodePng()
+    {
+        if( ! $qr_codes = $this->getQrCodesObject() ){
+            return null;
+        }
+
+        $result = array_filter($qr_codes[0]->links ?? [], function($item) {
+            return $item->rel === 'QRCODE.PNG';
+        });
+        
+        if (empty($result)) {
+            return null;
+        }
+
+        $firstItem = reset($result);
+        $href = $firstItem->href;
+        return $href;
+    }
+    
+    public function getPixQrCodeBase64()
+    {
+        if( ! $qr_codes = $this->getQrCodesObject() ){
+            return null;
+        }
+
+        $result = array_filter($qr_codes[0]->links ?? [], function($item) {
+            return $item->rel === 'QRCODE.BASE64';
+        });
+        
+        if (empty($result)) {
+            return null;
+        }
+
+        $firstItem = reset($result);
+        $href = file_get_contents($firstItem->href);
+        return $href;
+    }
 }

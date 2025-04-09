@@ -112,6 +112,26 @@ class PagamentoResponse extends HttpResponse
         ];
     }
 
+    public function getBoletoExpirationDate()
+    {
+        if( !$this->isBoleto() ){
+            return null;
+        }
+
+        $charge = $this->getLastCharge();
+        return $charge->payment_method->boleto->due_date;
+    }
+
+    public function getBoletoValor()
+    {
+        if( !$this->isBoleto() ){
+            return null;
+        }
+
+        $charge = $this->getLastCharge();
+        return $charge->amount->value;
+    }
+
     private function getQRCodes()
     {
         return $this->object()->qr_codes ?? null;
