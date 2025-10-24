@@ -107,8 +107,8 @@ class PagamentoResponse extends HttpResponse
 
         $charge = $this->getLastCharge();
         return (object) [
-            'barcode' => $charge->payment_method->boleto->barcode,
-            'formatted_barcode' => $charge->payment_method->boleto->formatted_barcode,
+            'barcode' => $charge->payment_method->boleto->barcode ?? null,
+            'formatted_barcode' => $charge->payment_method->boleto->formatted_barcode ?? null,
         ];
     }
 
